@@ -30,7 +30,7 @@
             size="large"
             clearable
             placeholder="请输入密码"
-            v-model="formData.password"
+            v-model.trim="formData.password"
             maxLength="150"
             show-password
           >
@@ -80,7 +80,7 @@
             size="large"
             maxLength="20"
             placeholder="请输入昵称"
-            v-model="formData.nickname"
+            v-model.trim="formData.nickname"
           >
             <template #prefix>
               <span class="iconfont icon-account"></span>
@@ -88,7 +88,47 @@
           </el-input>
 
         </el-form-item>
+        <el-form-item prop="registerPassword">
+
+            
+<el-input
+ 
+  size="large"
+  placeholder="请输入密码"
+  v-model="formData.registerPassword"
+  maxLength="150"
+  show-password
+>
+  <template #prefix>
+    <span class="iconfont icon-password"></span>
+  </template>
+</el-input>
+
+  
+  
+</el-form-item>
+<!-- 重置密码 -->
+<el-form-item prop="reRegisterPassword">
+
+  
+<el-input
+
+size="large"
+placeholder="请确认密码"
+v-model="formData.reRegisterPassword"
+maxLength="150"
+show-password
+>
+<template #prefix>
+<span class="iconfont icon-password"></span>
+</template>
+</el-input>
+
+
+
+</el-form-item>
         </div>
+        
         
         <el-form-item prop="checkCode">
             <div class="check-code-panel">
@@ -106,12 +146,12 @@
               <span class="iconfont icon-checkCode"></span>
             </template>
           </el-input>
-          <img src="checkCodeUrl" class="check-code" @click="changeCheckCode(0)">
+          <img :src="checkCodeUrl" class="check-code" @click="changeCheckCode(0)">
             </div>
             
         </el-form-item>
         
-        <el-form-item>
+        <el-form-item v-if="opType==1">
             <div class="rememberme-panel">
                 <el-checkbox v-model="formData.rememberMe">记住我</el-checkbox>
             </div>
@@ -120,10 +160,24 @@
                 <a href="javascript:void(0)" class="a-link" @click="showPanel(0)">没有账号？</a>
 
             </div>
-        </el-form-item>     
+        </el-form-item>  
+        <el-form-item v-if="opType==2">
+            
+           
+                <a href="javascript:void(0)" class="a-link" @click="showPanel(1)">去登录</a>
+        </el-form-item> 
+        <el-form-item v-if="opType==0">
+            
+           
+            <a href="javascript:void(0)" class="a-link" @click="showPanel(1)">已有账号？去登录</a>
+    </el-form-item>    
         <el-form-item>
             <el-button type="primary" class="op-btn" size="large">
-                <span>注册</span>
+                <span v-if="opType==0">注册</span>
+                <span v-if="opType==1">登录</span>
+                <span v-if="opType==2">重置密码</span>
+
+
             </el-button>
         </el-form-item>
 
