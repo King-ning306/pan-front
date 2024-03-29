@@ -29,8 +29,8 @@
             <template #dropdown>
                 <el-dropdown-menu>
                   <el-dropdown-item @click="updateAvatar">修改头像</el-dropdown-item>
-                  <el-dropdown-item>修改密码</el-dropdown-item>
-                  <el-dropdown-item>退出登录</el-dropdown-item>
+                  <el-dropdown-item @click="updatePassword">修改密码</el-dropdown-item>
+                  <el-dropdown-item @click="logout">退出登录</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
           </el-dropdown>
@@ -70,17 +70,24 @@
         </div>
 
       </div>
-      <UpdateAvatar ref="updateAvatarRef"></UpdateAvatar>
+      <UpdateAvatar @updateAvatar="reloadAvatar" ref="updateAvatarRef"></UpdateAvatar>
+      <UpdatePassword ref="updatePasswordRef"></UpdatePassword>
     </div>
   </template>
   
 <script setup>
+import UpdatePassword from "./UpdatePassword.vue";
 import UpdateAvatar from '@/views/UpdateAvatar.vue'
 import{ref,reactive,getCurrentInstance,nextTick, watch}from "vue";
 const {proxy}=getCurrentInstance();
 import {useRouter,useRoute} from "vue-router";
 const router= useRouter();
 const route=useRoute();
+const api={
+  logout: "/logout",
+}
+
+
 const userInfo=ref(proxy.VueCookies.get("userInfo"));
 const menus = [
   {
@@ -202,10 +209,35 @@ watch(
 },
 {immediate:true,deep:true}
 );
+//退出登录
+const logout = () => {
+  proxy.Confirm(`你确定要删除退出吗`, async () => {
+    let result = await proxy.Request({
+      url: api.logout,
+    });
+    if (!result) {
+      return;
+    }
+    proxy.VueCookies.remove("userInfo");
+    router.push("/login");
+  });
+};
+//上传头像
 const updateAvatarRef=ref();
 const updateAvatar=()=>{
   updateAvatarRef.value.show(userInfo.value)
+
+
 }
+const reloadAvatar = () => {
+  userInfo.value = proxy.VueCookies.get("userInfo");
+  timestamp.value = new Date().getTime();
+};
+//修改密码
+const updatePasswordRef = ref();
+const updatePassword = () => {
+  updatePasswordRef.value.show();
+};
 
 </script>
 <style lang="scss" scoped>
