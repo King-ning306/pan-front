@@ -7,6 +7,8 @@
       </div>
       <div class="right-panel">
         <el-popover
+          trigger="click"
+          :width="800"
           v-model:visible="showUploader"
           :offset="20"
           transition="none"

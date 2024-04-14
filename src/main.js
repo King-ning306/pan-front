@@ -17,6 +17,9 @@ import Dialog from '@/components/Dialog.vue'
 import Avatar from '@/components/Avatar.vue'
 import Table from '@/components/Table.vue'
 import Icon from '@/components/Icon.vue'
+import NoData from '@/components/NoData.vue'
+
+
 
 
 const app = createApp(App)
@@ -25,6 +28,7 @@ app.component("Dialog",Dialog)
 app.component("Avatar",Avatar)
 app.component("Table",Table)
 app.component("Icon",Icon)
+app.component("NoData",NoData)
 
 app.use(router)
 //配置全局组件
