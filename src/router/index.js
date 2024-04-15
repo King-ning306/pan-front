@@ -82,10 +82,6 @@ const router = createRouter({
       path: '/share/:shareId',
       name: '分享',
       component: () => import("@/views/webshare/Share.vue")
-    }, {
-      path: '/qqlogincalback',
-      name: "qq登录回调",
-      component: () => import('@/views/QqLoginCallback.vue'),
     }
 
     

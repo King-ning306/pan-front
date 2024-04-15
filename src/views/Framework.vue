@@ -19,7 +19,7 @@
             <span class="iconfont icon-transfer"></span>
           </template>
           <template #default>
-          <Uploader ref="uploaderRef"></Uploader>
+          <Uploader ref="uploaderRef"@uploadCallback="uploadCallbackHandler"></Uploader>
           </template>
         </el-popover>
         <el-dropdown>
@@ -120,7 +120,12 @@ const addFile=(data)=>{
   uploaderRef.value.addFile(file,filePid);
   
 }
-
+//上传文件回调
+const uploadCallbackHandler=()=>{
+  nextTick(()=>{
+    //TODO 更新用户空间
+  })
+}
 
 
 const userInfo = ref(proxy.VueCookies.get("userInfo"));
