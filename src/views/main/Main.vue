@@ -21,12 +21,18 @@
           新建文件夹
         </el-button>
 
-        <el-button type="danger">
-          <span class="iconfont icon-del"></span>
+        <el-button type="danger"
+        :disabled="selectFileIdList.length == 0"
+           @click="delFileBatch">
+          <span class="iconfont icon-del"
+          ></span>
           批量删除
         </el-button>
-        <el-button type="warning">
-          <span class="iconfont icon-move"></span>
+        <el-button type="warning"
+        :disabled="selectFileIdList.length == 0"
+          @click="moveFolderBatch">
+          <span class="iconfont icon-move" 
+          ></span>
           批量移动
         </el-button>
         <div class="search-panel">
@@ -94,9 +100,9 @@
             <span class="iconfont icon-share1">分享</span>
             <!-- 不能下载文件夹 -->
             <span class="iconfont icon-download" v-if="row.folderType==0">下载</span>
-            <span class="iconfont icon-del">删除</span>
+            <span class="iconfont icon-del" @click="delFile(row)">删除</span>
             <span class="iconfont icon-edit" @click="editFileName(index)">重命名</span>
-            <span class="iconfont icon-move">移动</span>
+            <span class="iconfont icon-move" @click="moveFolder(row)">移动</span>
             
             </template>
           </span>
@@ -111,6 +117,7 @@
         </template>
     </Table>
     </div>
+     <FolderSelect ref="folderSelectRef" @folderSelect="moveFolderDone"></FolderSelect>
   </div>
 </template>
 <script setup>
@@ -177,7 +184,16 @@ const tableOptions={
   extHeight:50,
   selectType:"checkbox",
 };
-const rowSelected =()=>{
+//多选
+const selectFileIdList=ref([]);
+const selectFileList = ref([]);
+const rowSelected =(rows)=>{
+  selectFileIdList.value=[];
+  rows.forEach(item => {
+    selectFileIdList.value.push(item.fileId);
+ 
+    
+  });
     
 };
 const editing=ref(false);
@@ -273,6 +289,86 @@ const showOp=(row)=>{
 const cancelShowOp=(row)=>{
   row.showOp=false;
 };
+const delFile=(row)=>{
+  proxy.Confirm(`你确定要删除【${row.fileName}】吗？删除的文件可以在10天内通过回收站还原`,
+  async ()=>{
+    let result=await proxy.Request({
+      url:api.delFile,
+      params:{
+        fileIds:row.fileId,
+      }
+    });
+    if(!result){
+      return;
+    }
+    loadDataList();
+  }
+  )
+};
+
+const delFileBatch=()=>{
+  if(selectFileIdList.value.length==0){
+    return;
+  }
+  proxy.Confirm(`你确定要删除这些文件吗？删除的文件可在10天内通过回收站还原`,
+  async ()=>{
+    let result =await proxy.Request({
+      url:api.delFile,
+      params:{
+        fileIds:selectFileIdList.value.join(","),
+      },
+    });
+    if(!result){
+      return;
+    }
+    loadDataList();
+  });
+
+}
+const currentMoveFile = ref({});
+const folderSelectRef=ref();
+const moveFolder=(data)=>{
+  currentMoveFile.value=data;
+   folderSelectRef.value.showFolderDialog();
+}
+const moveFolderBatch=()=>{
+    currentMoveFile.value = {};
+  //批量移动如果选择的是文件夹，那么要讲文件夹也过滤
+  const excludeFileIdList = [currentFolder.value.fileId];
+  selectFileList.value.forEach((item) => {
+    if (item.folderType == 1) {
+      excludeFileIdList.push(item.fileId);
+    }
+  });
+ 
+  folderSelectRef.value.showFolderDialog(excludeFileIdList.join(","));
+}
+
+const moveFolderDone= async(folderId)=>{
+   if(currentFolder.value.fileId==folderId){
+    proxy.Message.warning("文件正在当前目录，无需移动");
+    return;
+   }
+   let fileIdsArray=[];
+   if(currentFolder.value.fileId){
+    fileIdsArray.push(currentFolder.value.fileId);
+   }else{
+    fileIdsArray=fileIdsArray.concat(selectFileIdList.value);
+   }
+   let result=await proxy.Request({
+    url:api.changeFileFolder,
+    params:{
+      fileIds:fileIdsArray.join(","),
+      filePid:folderId
+    },
+   });
+   if(!result){
+    return;
+   }
+   //将框关闭
+   folderSelectRef.value.close();
+   loadDataList();
+}
 </script>
 <style lang="scss" scoped>
 @import "@/assets/file.list.scss";

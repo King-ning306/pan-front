@@ -227,19 +227,22 @@ const menus = [
 const timestamp = ref(0);
 const currentMenu = ref({});
 const currentPath = ref();
+
 const jump = (data) => {
   if (!data.path || data.menuCode == currentMenu.value.menuCode) {
     return;
   }
   router.push(data.path);
 };
+
 const setMenu = (menuCode, path) => {
   const menu = menus.find((item) => {
     return item.menuCode === menuCode;
   });
   currentMenu.value = menu;
-  currentPath.value == path;
+  currentPath.value = path;
 };
+
 watch(
   () => route,
   (newVal, oldVal) => {

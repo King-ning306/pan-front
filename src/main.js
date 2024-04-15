@@ -10,6 +10,7 @@ import Message from'@/utils/Message'
 import Request from './utils/Request'
 import Confirm from './utils/Confirm'
 import Utils from '@/utils/Utils'
+
 //引入cookies
 import VueCookies from 'vue-cookies'
 //自定义组件
@@ -18,6 +19,9 @@ import Avatar from '@/components/Avatar.vue'
 import Table from '@/components/Table.vue'
 import Icon from '@/components/Icon.vue'
 import NoData from '@/components/NoData.vue'
+import FolderSelect from '@/components/FolderSelect.vue'
+
+
 
 
 
@@ -29,6 +33,7 @@ app.component("Avatar",Avatar)
 app.component("Table",Table)
 app.component("Icon",Icon)
 app.component("NoData",NoData)
+app.component("FolderSelect",FolderSelect)
 
 app.use(router)
 //配置全局组件
@@ -38,6 +43,7 @@ app.config.globalProperties.Message=Message
 app.config.globalProperties.Request=Request
 app.config.globalProperties.VueCookies=VueCookies
 app.config.globalProperties.Utils=Utils
+
 
 app.config.globalProperties.globalInfo={
      avatarUrl:"/api/getAvatar/",
