@@ -36,24 +36,24 @@
           批量移动
         </el-button>
         <div class="search-panel">
-          <el-input clearable placeholder="请输入文件名搜索">
+          <el-input clearable placeholder="请输入文件名搜索" v-model="fileNameFuzzy" @keyup.enter="search" >
             <template #suffix>
-              <i class="iconfont icon-search"></i>
+              <i class="iconfont icon-search" @click="search"></i>
             </template>
           </el-input>
         </div>
-        <div class="iconfont icon-refresh"></div>
+        <div class="iconfont icon-refresh" @click="loadDataList"></div>
       </div>
-      <div>全部文件</div>
+      <Navigation ref="navigationRef" @navChange="navChange"></Navigation>
     </div>
-    <div class="file-list">
+    <div class="file-list" v-if="tableData.list&&tableData.list.length>0">
       <Table 
       ref="dataTableRef"
       :columns="columns"
       
       :dataSource="tableData"
       :fetch="loadDataList"
-      :initFetch="true"
+      :initFetch="false"
       :options="tableOptions"
       @rowSelected="rowSelected"
       >
@@ -73,7 +73,7 @@
               <icon v-if="row.folderType == 1" :fileType="0"></icon>
             </template>
           <span class="file-name" v-if="!(row.showEdit)" :title="row.fileName">
-             <span>{{row.fileName}}</span>
+             <span @click="preview(row)">{{row.fileName}}</span>
              <span v-if="row.status ==0" class="transfer-status">转码中</span>
              <span v-if="row.status ==1" class="transfer-status transfer-fail">转码失败</span>
           </span>
@@ -117,18 +117,52 @@
         </template>
     </Table>
     </div>
+    <div v-else class="no-data">
+      <div class="no-data-inner">
+        <Icon iconName="no_data" :width="120" fit="fill"></Icon>
+        <div class="tips">当前目录为空，上传你的第一个文件吧</div>
+        <div class="op-list">
+          <el-upload
+            :show-file-list="false"
+            :with-credentials="true"
+            :multiple="true"
+            :http-request="addFile"
+            :accept="fileAccept"
+          >
+            <div class="op-item">
+              <Icon iconName="file" :width="60"></Icon>
+              <div>上传文件</div>
+            </div>
+          </el-upload>
+          <div class="op-item" v-if="category == 'all'" @click="newFolder">
+            <Icon iconName="folder" :width="60"></Icon>
+            <div>新建目录</div>
+          </div>
+        </div>
+      </div>
+    </div>
      <FolderSelect ref="folderSelectRef" @folderSelect="moveFolderDone"></FolderSelect>
   </div>
 </template>
 <script setup>
-
-import {ref,reactive,getCurrentInstance,nextTick} from 'vue'
+import CategoryInfo from "@/js/CategoryInfo.js"
+const showLoading=ref(true);
+import {ref,reactive,getCurrentInstance,nextTick,computed} from 'vue'
 const{proxy}=getCurrentInstance();
+//文件回调
+const reload = () => {
+  showLoading.value = false;
+  loadDataList();
+};
+defineExpose({
+  reload,
+});
+//添加文件
 const emit =defineEmits(["addFile"])
 const addFile=(fileData)=>{
    emit("addFile",{file:fileData.file,filePid:currentFolder.value.fileId});
 };
-const currentFolder=ref({fileId:0});
+const currentFolder=ref({fileId:"0"});
  const api = {
   loadDataList: "/file/loadDataList",
   rename: "/file/rename",
@@ -157,21 +191,33 @@ const columns = [
     width: 200,
   },
 ];
+//搜索功能
+const search=()=>{
+  showLoading.value=true;
+  loadDataList();
+}
+//根据目录设置接受文件类型
+const fileAccept=computed(()=>{
+  const categoryItem= CategoryInfo[category.value];
+  return categoryItem ?categoryItem.accept:"*";
+})
 const fileNameFuzzy=ref();
 const tableData =ref({});
-const categroy=ref();
+const category=ref();
 const loadDataList =async()=>{
   let params={
       pageNo:tableData.value.pageNo,
       pageSize:tableData.value.pageSize,
       fileNameFuzzy:fileNameFuzzy.value,
-      filePid:0,
+      filePid:currentFolder.value.fileId,
+      category:category.value,
     };
-    if(params.categroy!=="all"){
+    if(params.category!=="all"){
       delete params.filePid;
     }
     let result= await proxy.Request({
       url:api.loadDataList,
+      showLoading:showLoading.value,
       params:params,
      
     })
@@ -345,13 +391,14 @@ const moveFolderBatch=()=>{
 }
 
 const moveFolderDone= async(folderId)=>{
-   if(currentFolder.value.fileId==folderId){
+   if(currentMoveFile.value.filePid === folderId ||
+    currentFolder.value.fileId == folderId){
     proxy.Message.warning("文件正在当前目录，无需移动");
     return;
    }
    let fileIdsArray=[];
-   if(currentFolder.value.fileId){
-    fileIdsArray.push(currentFolder.value.fileId);
+   if(currentMoveFile.value.fileId){
+    fileIdsArray.push(currentMoveFile.value.fileId);
    }else{
     fileIdsArray=fileIdsArray.concat(selectFileIdList.value);
    }
@@ -367,6 +414,19 @@ const moveFolderDone= async(folderId)=>{
    }
    //将框关闭
    folderSelectRef.value.close();
+   loadDataList();
+}
+const navigationRef=ref();
+//预览
+const preview=(data)=>{
+  if(data.folderType==1){
+     navigationRef.value.openFolder(data);
+  }
+}
+const navChange=(data)=>{
+   const {curFolder,categoryId}=data;
+   currentFolder.value=curFolder;
+   category.value=categoryId;
    loadDataList();
 }
 </script>

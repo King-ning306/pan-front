@@ -9,14 +9,16 @@
       @close="close"
     >
     
-    <div class="navigation-panel"></div>
+    <div class="navigation-panel">
+    <Navigation ref="navigationRef" @navChange="navChange" :watchPath="false"></Navigation>
+    </div>
     <div class="folder-list" v-if="folderList.length>0">
         <div class="folder-item" v-for="item in folderList" @click="selectFolder(item)">
           <Icon :fileType="0"></Icon>
           <div class="file-name">{{item.fileName}}</div>
         </div>
     </div>
-    <div v-else>
+    <div v-else class="tips">
       移动到<span >{{currentFolder.fileName}}</span>
     </div>
     </Dialog>
@@ -51,6 +53,7 @@ const folderList=ref([]);
 const currentFileIds=ref({});
 
 const currentFolder=ref({});
+
 const loadAllFolder =async()=>{
     let result=await proxy.Request({
         url:api.loadAllFolder,
@@ -69,8 +72,10 @@ const showFolderDialog=(currentFolder)=>{
     currentFileIds.value=currentFolder;
     loadAllFolder();
 }
+const navigationRef=ref();
+//选择目录
 const selectFolder=(data)=>{
-
+    navigationRef.value.openFolder(data);
 
 }
 const emit =defineEmits(["folderSelect"]);
@@ -83,12 +88,20 @@ const close=()=>{
 }
 defineExpose({
     showFolderDialog,
-    folderSelect,
+    
     close
 
 }
     
-)
+);
+const navChange=(data)=>{
+  const { curFolder}=data;
+  currentFolder.value=curFolder
+  filePid.value=curFolder.fileId;
+  loadAllFolder();
+}
+
+
 
 </script>
 <style lang="scss" scoped>

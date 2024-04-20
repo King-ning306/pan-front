@@ -78,13 +78,28 @@
           </div>
           <div class="space-info">
             <div>空间使用</div>
-            <div class="percent"></div>
+            <div class="percent">
+              <el-progress :percentage="Math.floor(
+                (useSpaceInfo.useSpace/useSpaceInfo.totalSpace)*10000
+                )/100"
+                color="#409eff"></el-progress>
+            </div>
+            <div class="space-use">
+              <div class="use">
+                 {{proxy.Utils.size2Str(useSpaceInfo.useSpace)}}/{{proxy.Utils.size2Str(useSpaceInfo.totalSpace)}}
+              </div>
+              <div class="iconfont icon-refresh" @click="getUseSpace"></div>
+            
+            </div>
           </div>
         </div>
       </div>
       <div class="body-content">
         <router-view v-slot="{ Component }">
-          <component :is="Component" @addFile="addFile"></component>
+          <component 
+          ref="routerViewRef"
+          :is="Component" 
+          @addFile="addFile" ></component>
         </router-view>
       </div>
     </div>
@@ -107,8 +122,10 @@ const { proxy } = getCurrentInstance();
 import { useRouter, useRoute } from "vue-router";
 const router = useRouter();
 const route = useRoute();
+
 const api = {
   logout: "/logout",
+ getUseSpace: "/getUseSpace",
 };
 //显示上传区域
 const showUploader = ref(false);
@@ -120,12 +137,19 @@ const addFile=(data)=>{
   uploaderRef.value.addFile(file,filePid);
   
 }
+
+const routerViewRef=ref();
 //上传文件回调
-const uploadCallbackHandler=()=>{
-  nextTick(()=>{
-    //TODO 更新用户空间
-  })
-}
+
+ const uploadCallbackHandler = () => {
+  nextTick(() => {
+    routerViewRef.value.reload();
+    getUseSpace();
+   
+  });
+ };
+
+
 
 
 const userInfo = ref(proxy.VueCookies.get("userInfo"));
@@ -279,6 +303,19 @@ const updatePasswordRef = ref();
 const updatePassword = () => {
   updatePasswordRef.value.show();
 };
+//使用空间
+const useSpaceInfo =ref({useSpace:0,totalSpace:1});
+const getUseSpace =async()=>{
+  let result=await proxy.Request({
+    url:api.getUseSpace,
+    showLoading:false,
+  })
+  if(!result){
+    return;
+  }
+  useSpaceInfo.value=result.data;
+}
+getUseSpace();
 </script>
 <style lang="scss" scoped>
 .header {
