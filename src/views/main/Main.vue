@@ -142,6 +142,8 @@
       </div>
     </div>
      <FolderSelect ref="folderSelectRef" @folderSelect="moveFolderDone"></FolderSelect>
+     <!-- 预览 -->
+     <Preview ref="previewRef"></Preview>
   </div>
 </template>
 <script setup>
@@ -418,10 +420,17 @@ const moveFolderDone= async(folderId)=>{
 }
 const navigationRef=ref();
 //预览
+const previewRef=ref();
 const preview=(data)=>{
-  if(data.folderType==1){
+    if(data.folderType==1){
      navigationRef.value.openFolder(data);
+     return;
   }
+  if(data.status!=2){
+    proxy.Message.warning("文件正在转码中，无法预览");
+    return;
+  }
+  previewRef.value.showPreview(data,0)
 }
 const navChange=(data)=>{
    const {curFolder,categoryId}=data;
