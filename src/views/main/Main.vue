@@ -97,7 +97,7 @@
           </div>
           <span class="op" >
             <template v-if="row.showOp&&row.fileId&&row.status==2">
-            <span class="iconfont icon-share1">分享</span>
+            <span class="iconfont icon-share1" @click="share(row)">分享</span>
             <!-- 不能下载文件夹 -->
             <span class="iconfont icon-download" v-if="row.folderType==0" @click="download(row)">下载</span>
             <span class="iconfont icon-del" @click="delFile(row)">删除</span>
@@ -144,10 +144,13 @@
      <FolderSelect ref="folderSelectRef" @folderSelect="moveFolderDone"></FolderSelect>
      <!-- 预览 -->
      <Preview ref="previewRef"></Preview>
+     <!-- 分享 -->
+     <ShareFile ref="shareRef"></ShareFile>
   </div>
 </template>
 <script setup>
 import CategoryInfo from "@/js/CategoryInfo.js"
+import ShareFile from"./ShareFile.vue"
 const showLoading=ref(true);
 import {ref,reactive,getCurrentInstance,nextTick,computed} from 'vue'
 const{proxy}=getCurrentInstance();
@@ -222,7 +225,7 @@ const loadDataList =async()=>{
       showLoading:showLoading.value,
       params:params,
      
-    })
+    });
     if(!result){
       return;
     }
@@ -446,7 +449,11 @@ const download=async(row)=>{
     return;
   }
   window.location.href=api.download+"/"+result.data;
-}
+};
+const shareRef = ref();
+const share = (row) => {
+  shareRef.value.show(row);
+};
 </script>
 <style lang="scss" scoped>
 @import "@/assets/file.list.scss";
