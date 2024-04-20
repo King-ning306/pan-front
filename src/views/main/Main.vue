@@ -99,7 +99,7 @@
             <template v-if="row.showOp&&row.fileId&&row.status==2">
             <span class="iconfont icon-share1">分享</span>
             <!-- 不能下载文件夹 -->
-            <span class="iconfont icon-download" v-if="row.folderType==0">下载</span>
+            <span class="iconfont icon-download" v-if="row.folderType==0" @click="download(row)">下载</span>
             <span class="iconfont icon-del" @click="delFile(row)">删除</span>
             <span class="iconfont icon-edit" @click="editFileName(index)">重命名</span>
             <span class="iconfont icon-move" @click="moveFolder(row)">移动</span>
@@ -437,6 +437,15 @@ const navChange=(data)=>{
    currentFolder.value=curFolder;
    category.value=categoryId;
    loadDataList();
+};
+const download=async(row)=>{
+  let result=await proxy.Request({
+    url:api.createDownloadUrl+"/"+row.fileId,
+  });
+  if(!result){
+    return;
+  }
+  window.location.href=api.download+"/"+result.data;
 }
 </script>
 <style lang="scss" scoped>
