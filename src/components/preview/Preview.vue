@@ -106,6 +106,9 @@ const showPreview = (data, showPart) => {
     if(showPart==0){
         _url=_url+"/"+data.fileId;
         _createDownloadUrl=_createDownloadUrl+"/"+data.fileId;
+    }else if(showPart==1){
+      _url=_url+"/"+data.userId+"/"+data.fileId;
+      _createDownloadUrl=_createDownloadUrl+"/"+data.userId+"/"+data.fileId;
     }
     url.value=_url;
     createDownloadUrl.value = _createDownloadUrl;
