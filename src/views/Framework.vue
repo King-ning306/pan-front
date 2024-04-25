@@ -99,7 +99,8 @@
           <component 
           ref="routerViewRef"
           :is="Component" 
-          @addFile="addFile" ></component>
+          @addFile="addFile" 
+          @reload="getUseSpace"></component>
         </router-view>
       </div>
     </div>
