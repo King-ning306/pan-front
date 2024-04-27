@@ -52,7 +52,7 @@
               </template>
             </el-popover>
           </el-form-item>
-          <el-form-item prop="nickname">
+          <el-form-item prop="nickname" v-if="opType==0">
             <el-input size="large" maxLength="20" placeholder="请输入昵称" v-model.trim="formData.nickname">
               <template #prefix>
                 <span class="iconfont icon-account"></span>
