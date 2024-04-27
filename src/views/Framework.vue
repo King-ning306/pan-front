@@ -51,17 +51,19 @@
     <div class="body">
       <div class="left-sider">
         <div class="menu-list">
+         <template v-for="item in menus">
           <div
             :class="[
               'menu-item',
               item.menuCode == currentMenu.menuCode ? 'active' : '',
             ]"
-            v-for="item in menus"
+            v-if="item.allShow||(!item.allShow && userInfo.admin)"
             @click="jump(item)"
           >
             <div :class="['iconfont', 'icon-' + item.icon]"></div>
             <div class="text">{{ item.name }}</div>
           </div>
+          </template>
         </div>
         <div class="menu-sub-list">
           <div
